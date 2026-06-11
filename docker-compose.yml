@@ -15,6 +15,7 @@
 # - database: Just the PostgreSQL database
 # - just-backend: All services except webapp for local development
 # - deprecated: All deprecated services (not recommended)
+# - mcp-api-docs: MCP server for team API specs (OpenAPI / JSON) — see packages/hoppscotch-mcp-api-docs
 
 # USAGE:
 #
@@ -23,6 +24,7 @@
 # To run specific components: docker compose --profile backend up
 # To run all except webapp: docker compose --profile just-backend up
 # To run deprecated services: docker compose --profile deprecated up
+# To run MCP API docs server: docker compose --profile mcp-api-docs up
 
 # NOTE: The default and default-no-db profiles should not be mixed with individual service
 # profiles as they would conflict on ports.
@@ -179,6 +181,25 @@ services:
         condition: service_healthy
     command: sh -c "pnpm exec prisma migrate deploy"
 
+  # Streamable HTTP MCP for stored API specs (Bearer auth). Set MCP_CLIENT_KEYS in .env.
+  # Filesystem storage uses DATA_DIR=/data (volume below). For S3, unset DATA_DIR and set S3_BUCKET + AWS_*.
+  hoppscotch-mcp-api-docs:
+    profiles: ["mcp-api-docs"]
+    container_name: hoppscotch-mcp-api-docs
+    build:
+      context: .
+      dockerfile: packages/hoppscotch-mcp-api-docs/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      - PORT=8790
+      - DATA_DIR=/data
+    volumes:
+      - hoppscotch_mcp_api_docs_data:/data
+    ports:
+      - "8790:8790"
+
   # All the services listed below are deprecated
   # These services are kept for backward compatibility but should not be used for new deployments
   hoppscotch-old-backend:
@@ -231,6 +252,10 @@ services:
     ports:
       - "3100:8080"
 
+volumes:
+  hoppscotch_mcp_api_docs_data:
+    driver: local
+
 # DEPLOYMENT SCENARIOS:
 # 1. Default deployment (recommended):
 #    docker compose --profile default up
@@ -252,6 +277,10 @@ services:
 # 5. Deprecated services:
 #    docker compose --profile deprecated up
 #    This will start all deprecated services (not recommended for new deployments)
+#
+# 6. MCP API documentation server (Cursor / agents):
+#    docker compose --profile mcp-api-docs up
+#    Configure MCP_CLIENT_KEYS and storage (DATA_DIR volume or S3) in .env — see packages/hoppscotch-mcp-api-docs/README.md
 #
 # Remember: The default and default-no-db profiles should not be mixed with individual service
 # profiles as they would conflict on ports.

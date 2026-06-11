@@ -1,0 +1,31 @@
+{
+  "name": "hoppscotch-mcp-api-docs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Streamable HTTP MCP server for team API specs (OpenAPI / Hoppscotch JSON) with S3 or filesystem storage",
+  "type": "module",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "do-typecheck": "tsc -p tsconfig.build.json --noEmit"
+  },
+  "dependencies": {
+    "@cfworker/json-schema": "4.1.1",
+    "@apidevtools/swagger-parser": "11.0.0",
+    "@aws-sdk/client-s3": "3.787.0",
+    "@modelcontextprotocol/express": "2.0.0-alpha.2",
+    "@modelcontextprotocol/node": "2.0.0-alpha.2",
+    "@modelcontextprotocol/server": "2.0.0-alpha.2",
+    "express": "5.2.1",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.6",
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3"
+  }
+}
